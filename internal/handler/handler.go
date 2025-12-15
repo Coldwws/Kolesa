@@ -1,21 +1,18 @@
 package handler
 
 import (
-	"sync"
-
-	"github.com/Coldwws/kolesa/internal/models"
+	"github.com/Coldwws/kolesa/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	mu   sync.RWMutex
-	data map[int64]models.Car
-	lastID int64
+
+	service service.CarService
 }
 
-func NewHandler() *Handler {
+func NewHandler(service service.CarService) *Handler {
 	return &Handler{
-		data : make(map[int64]models.Car),
+		service: service,
 	}
 }
 
