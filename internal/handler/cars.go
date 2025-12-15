@@ -30,6 +30,14 @@ func (h *Handler)CreateCar(c *gin.Context){
 			c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 			return
 		}
+		currentYear := time.Now().Year()
+		if car.Year< 1900 || car.Year > currentYear{
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":"year must be between 1900 and " + strconv.Itoa(currentYear),
+			})
+			return
+			}
+
 		h.mu.Lock()
 		defer h.mu.Unlock()
 
@@ -74,6 +82,15 @@ func (h *Handler)UpdateCar(c *gin.Context){
 	if err := c.ShouldBindJSON(&UpdateCar); err != nil{
 		c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 		return
+	}
+	currentYear := time.Now().Year()
+	if UpdateCar.Year != nil{
+		if *UpdateCar.Year < 1900 || *UpdateCar.Year > currentYear{
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":"year must be between 1900 and " + strconv.Itoa(currentYear),
+			})
+			return
+		}
 	}
 	h.mu.Lock()
 	defer h.mu.Unlock()
