@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Coldwws/kolesa/internal/models"
+	"github.com/Coldwws/kolesa/internal/validate"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,13 +31,10 @@ func (h *Handler)CreateCar(c *gin.Context){
 			c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 			return
 		}
-		currentYear := time.Now().Year()
-		if car.Year< 1900 || car.Year > currentYear{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":"year must be between 1900 and " + strconv.Itoa(currentYear),
-			})
+		if ok,msg := validate.ValidateCar(car);!ok{
+			c.JSON(http.StatusBadRequest,gin.H{"error":msg})
 			return
-			}
+		}
 
 		h.mu.Lock()
 		defer h.mu.Unlock()
@@ -56,8 +54,8 @@ func (h *Handler) GetCarByID(c *gin.Context){
 		if err != nil{
 			c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
 			return
-		
 		}
+
 		h.mu.RLock()
 		car, ok := h.data[id]
 		h.mu.RUnlock()
@@ -83,14 +81,9 @@ func (h *Handler)UpdateCar(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 		return
 	}
-	currentYear := time.Now().Year()
-	if UpdateCar.Year != nil{
-		if *UpdateCar.Year < 1900 || *UpdateCar.Year > currentYear{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":"year must be between 1900 and " + strconv.Itoa(currentYear),
-			})
-			return
-		}
+	if ok,msg := validate.ValidateUpdateCar(UpdateCar); !ok{
+		c.JSON(http.StatusBadRequest, gin.H{"error":msg})
+		return
 	}
 	h.mu.Lock()
 	defer h.mu.Unlock()
